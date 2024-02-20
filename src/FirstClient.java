@@ -21,8 +21,8 @@ public class FirstClient extends JFrame {
         setSize(400, 300);
         setLocationRelativeTo(null);
 
-        //initComponents();
-        //connectToServer();
+        initComponents();
+        connectToServer();
     }
 
     public void initComponents() {
@@ -44,12 +44,12 @@ public class FirstClient extends JFrame {
 
         messageField = new JTextField();
         JButton sendButton = new JButton("Enviar");
-    /*    sendButton.addActionListener(new ActionListener() {
+        sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendMessage();
             }
-        });*/
+        });
 
         inputPanel.add(messageField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
@@ -58,4 +58,62 @@ public class FirstClient extends JFrame {
         add(inputPanel, BorderLayout.SOUTH);
     }
 
+    private void sendMessage() {
+        String message = messageField.getText();
+        if (!message.isEmpty()) {
+            writer.println(message);
+            messageField.setText("");
+        }
+    }
+
+    private void connectToServer() {
+        userNickname = JOptionPane.showInputDialog("Ingrese su nickname:");
+
+        String serverAddress = "localhost";
+
+        try {
+            Socket socket = new Socket(serverAddress, 12345);
+            scanner = new Scanner(socket.getInputStream());
+            writer = new PrintWriter(socket.getOutputStream(), true);
+
+            writer.println(userNickname);
+
+            new Thread(() -> {
+                try {
+                    while (scanner.hasNextLine()) {
+                        String serverMessage = scanner.nextLine();
+                        handleServerMessage(serverMessage);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleServerMessage(String message) {
+        if (message.startsWith("/userlist ")) {
+            String[] userArray = message.substring("/userlist ".length()).split(" ");
+            SwingUtilities.invokeLater(() -> {
+                userList.setListData(userArray);
+            });
+        } else if (message.equals("/nicknameinuse")) {
+            userNickname = JOptionPane.showInputDialog("El nickname ya está en uso. Por favor, elige otro:");
+            writer.println(userNickname);
+        } else {
+            chatArea.append(message + "\n");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new FirstClient().setVisible(true);
+            }
+        });
+    }
 }
