@@ -25,6 +25,37 @@ public class FirstClient extends JFrame {
         //connectToServer();
     }
 
+    public void initComponents() {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
 
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        JScrollPane chatScrollPane = new JScrollPane(chatArea);
+        mainPanel.add(chatScrollPane, BorderLayout.CENTER);
+
+        userList = new JList<>();
+        JScrollPane userScrollPane = new JScrollPane(userList);
+        userScrollPane.setPreferredSize(new Dimension(100, 0));
+        mainPanel.add(userScrollPane, BorderLayout.EAST);
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new BorderLayout());
+
+        messageField = new JTextField();
+        JButton sendButton = new JButton("Enviar");
+    /*    sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });*/
+
+        inputPanel.add(messageField, BorderLayout.CENTER);
+        inputPanel.add(sendButton, BorderLayout.EAST);
+
+        add(mainPanel, BorderLayout.CENTER);
+        add(inputPanel, BorderLayout.SOUTH);
+    }
 
 }
